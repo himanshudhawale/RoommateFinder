@@ -8,16 +8,16 @@ This is an android application which helps registered users to connect with othe
 * [Link to GitHub Repo](https://github.com/himanshudhawale/RoommateFinder-Design.git)
 
 ## App Features
-* [Sign up] (#Sign up)
-* [Login] (#Login)
-* [My Profile] (#My Profile)
-* [Forum] (#Forum)
-* [Filtering] (#Filtering)
-* [My Posts] (#My Posts)
-* [New Post] (#New Post)
-* [Payment] (#Payment)
-* [Payment Portal] (#Payment Portal)
-* [Chat] (#Chat)
+* [Sign up](#Sign-up)
+* [Login](#Login)
+* [My Profile](#My-Profile)
+* [Forum](#Forum)
+* [Filtering](#Filtering)
+* [My Posts](#My-Posts)
+* [New Post](#New-Post)
+* [Payment](#Payment)
+* [Payment Portal](#Payment-Portal)
+* [Chat](#Chat)
 
 
 
