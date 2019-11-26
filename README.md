@@ -3,6 +3,10 @@
 ## What is RoommateFinder ?
 This is an android application which helps registered users to connect with other people looking for a roommate in a city. This application provides a forum feature where people can post about their requirements. People can also view the history of roommate matches formed through the app. There is an option for search/filter for the post regarding rooms.
 
+## Link to Design of the application 
+* [Link to Adobe XD](https://xd.adobe.com/spec/d3b2e53b-ba6d-49c6-4ba1-9b7d86000384-a583/)
+* [Link to GitHub Repo](https://github.com/himanshudhawale/RoommateFinder-Design.git)
+
 ## App Features
 * [Sign up] (#Sign up)
 * [Login] (#Login)
