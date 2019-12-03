@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view"
+    tools:openDrawer="start"
+    >
+
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/nav_forum"
+            android:title="Forum"
+            android:icon="@drawable/forum"/>
+
+        <item android:id="@+id/nav_mypost"
+            android:icon="@drawable/mypost"
+            android:title="My Posts"/>
+
+        <item android:id="@+id/nav_chats"
+            android:icon="@drawable/chats"
+            android:title="Chats"/>
+
+        <item android:id="@+id/nav_myprofile"
+            android:icon="@drawable/myprofile"
+            android:title="Profile Settings"/>
+
+        <item android:id="@+id/nav_savedposts"
+            android:icon="@drawable/saved"
+            android:title="Saved Posts"/>
+
+        <item android:id="@+id/nav_newpost"
+            android:icon="@drawable/newpost"
+            android:title="Create A New Post"/>
+
+        <item android:id="@+id/nav_payment"
+            android:icon="@drawable/payment"
+            android:title="Payment"/>
+
+        <item android:id="@+id/nav_signout"
+            android:title="Sign out"
+            android:icon="@drawable/signout"/>
+
+    </group>
+</menu>
