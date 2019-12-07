@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -18,8 +19,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
@@ -88,6 +89,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         TextView city;
         TextView date;
         CircleImageView circular;
+        ViewPager mImageViewPager;
+        TabLayout tabLayout;
+
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -95,6 +99,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             city = itemView.findViewById(R.id.textViewCityItem);
             date = itemView.findViewById(R.id.textViewDateItem);
             circular = itemView.findViewById(R.id.imageViewuserItem);
+            mImageViewPager = itemView.findViewById(R.id.pager);
+            tabLayout =itemView.findViewById(R.id.tabDots);
+            tabLayout.setupWithViewPager(mImageViewPager, true);
+
+
 
         }
     }
