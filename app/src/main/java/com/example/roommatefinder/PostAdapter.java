@@ -1,27 +1,23 @@
 package com.example.roommatefinder;
 
 import android.content.Context;
-import android.util.Log;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
-
 import com.google.android.material.tabs.TabLayout;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
+import com.squareup.picasso.Picasso;
 import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 import de.hdodenhof.circleimageview.CircleImageView;
+
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
@@ -50,8 +46,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         final Post post = postList.get(position);
+        final Bitmap[] bitmaps = new Bitmap[4];
+        final int dotCounts=post.imageList.size();
+//        final ImageView[] dots= new ImageView[4];
 
         FirebaseDatabase.getInstance().getReference("users").child(post.userID).addValueEventListener(new ValueEventListener() {
             @Override
@@ -61,10 +60,61 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 holder.name.setText(user.first + " " + user.last);
                 holder.city.setText(post.city);
                 holder.date.setText(post.date);
+                Picasso.get()
+                        .load(user.imageURL)
+                        .into(holder.circular);
 
-//                Log.d("demoooo", post.city);
-//                Log.d("demooooo",user.first);
+                ViewPagerAdapter adapter = new ViewPagerAdapter(mContext, post.imageList);
+                holder.mImageViewPager.setAdapter(adapter);
+                holder.mImageViewPager.setOffscreenPageLimit(4);
 
+                for(int i=0; i<dotCounts; i++)
+                {
+                    holder.dotLayout.getTabAt(i).setIcon(R.drawable.nonactive_dot);
+                }
+                holder.dotLayout.getTabAt(0).setIcon(R.drawable.active_dot);
+
+
+                holder.dotLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+                    @Override
+                    public void onTabSelected(TabLayout.Tab tab) {
+                    }
+
+                    @Override
+                    public void onTabUnselected(TabLayout.Tab tab) {
+
+                    }
+
+                    @Override
+                    public void onTabReselected(TabLayout.Tab tab) {
+
+                    }
+                });
+
+                holder.mImageViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                    @Override
+                    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                    }
+
+                    @Override
+                    public void onPageSelected(int position) {
+                        for(int i=0; i< dotCounts; i++)
+                        {
+//                            dots[i] = new ImageView(mContext);
+
+                            holder.dotLayout.getTabAt(i).setIcon(R.drawable.nonactive_dot);
+
+                        }
+                        holder.dotLayout.getTabAt(position).setIcon(R.drawable.active_dot);
+
+//                        Picasso.get().load(post.imageList.get(position)).into(dots[position]);
+                    }
+
+                    @Override
+                    public void onPageScrollStateChanged(int state) {
+
+                    }
+                });
 
             }
 
@@ -73,6 +123,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
             }
         });
+
     }
 
     @Override
@@ -90,8 +141,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         TextView date;
         CircleImageView circular;
         ViewPager mImageViewPager;
-        TabLayout tabLayout;
-
+        TabLayout dotLayout;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -100,10 +150,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             date = itemView.findViewById(R.id.textViewDateItem);
             circular = itemView.findViewById(R.id.imageViewuserItem);
             mImageViewPager = itemView.findViewById(R.id.pager);
-            tabLayout =itemView.findViewById(R.id.tabDots);
-            tabLayout.setupWithViewPager(mImageViewPager, true);
-
-
+            dotLayout = itemView.findViewById(R.id.sliderDots);
+            dotLayout.setupWithViewPager(mImageViewPager);
 
         }
     }

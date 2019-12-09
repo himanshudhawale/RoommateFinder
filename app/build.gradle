@@ -34,8 +34,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:19.2.0'
     implementation 'com.google.firebase:firebase-storage:19.1.0'
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'com.chabbal:slidingdotsplash:1.0.2'
-
+    implementation 'org.ocpsoft.prettytime:prettytime:4.0.2.Final'
 
 }
 apply plugin: 'com.google.gms.google-services'

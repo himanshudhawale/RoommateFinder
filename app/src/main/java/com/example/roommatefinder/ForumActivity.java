@@ -8,6 +8,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
@@ -173,10 +174,22 @@ public class ForumActivity extends AppCompatActivity implements  NavigationView.
 //                break;
             //nav_newpost
 
+            case R.id.nav_chats:
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ChatFragment()).commit();
+                break;
+
+//
+            case R.id.nav_signout:
+                FirebaseAuth.getInstance().signOut();
+                Intent intent = new Intent(ForumActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+                break;
 
             case R.id.nav_newpost:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new NewPostFragment()).commit();
                 break;
+
 
 
         }
@@ -184,6 +197,9 @@ public class ForumActivity extends AppCompatActivity implements  NavigationView.
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
+
 
 
 

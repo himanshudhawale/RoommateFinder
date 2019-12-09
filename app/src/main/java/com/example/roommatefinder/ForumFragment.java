@@ -1,6 +1,7 @@
 package com.example.roommatefinder;
 
 
+import android.content.Intent;
 import android.graphics.Canvas;
 
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -77,6 +80,8 @@ public class ForumFragment extends Fragment {
                 recyclerView.setAdapter(postAdapter);
 
 
+
+
                 swipeController = new SwipeController(new SwipeControllerActions() {
                     @Override
                     public void onRightClicked(int position) {
@@ -107,6 +112,22 @@ public class ForumFragment extends Fragment {
                         // ***********************
                         // ***********************
                         // Start chatting but also send the post object
+                        Post post = postAdapter.postList.get(position);
+
+                        if(post.userID.equals(currentUser.getUid()))
+                        {
+                            Toast.makeText(getContext().getApplicationContext(), "Disabled for post owner", Toast.LENGTH_SHORT).show();
+                        } else {
+
+//                        FragmentTransaction t = getFragmentManager().beginTransaction();
+//                        Fragment mFrag = new MyFragment();
+//                        t.replace(R.id.content_frame, mFrag);
+//                        t.commit();
+                            Intent intent = new Intent(getActivity(), ChatActivity.class);
+                            intent.putExtra("FORUM_FRAGMENT_KEY", post.pid);
+                            startActivity(intent);
+                        }
+
                     }
 
                 });
