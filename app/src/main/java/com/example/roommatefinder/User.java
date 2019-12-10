@@ -3,11 +3,11 @@ import java.io.Serializable;
 
 public class User implements Serializable {
 
-    public String first, last, email, uID, password, gender, age, city, imageURL;
+    public String first, last, email, uID, password, gender, age, city, imageURL, customerID;
     public String status = "none";
     public Double latitude,longitude;
 
-    public User(String uID, String first, String last, String email, String password, String gender,String city, String age, String image, String status) {
+    public User(String uID, String first, String last, String email, String password, String gender,String city, String age, String image, String status, String customerID) {
         this.first = first;
         this.last = last;
         this.email = email;
@@ -18,6 +18,7 @@ public class User implements Serializable {
         this.age = age;
         this.imageURL=image;
         this.status = status;
+        this.customerID = customerID;
     }
 
     public User()

@@ -1,21 +1,31 @@
 package com.example.roommatefinder;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,6 +37,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
 public class ForumActivity extends AppCompatActivity implements  NavigationView.OnNavigationItemSelectedListener {
 
     Toolbar toolbar;
@@ -35,11 +50,13 @@ public class ForumActivity extends AppCompatActivity implements  NavigationView.
     FirebaseUser currentUser;
     DatabaseReference myRef;
     User userValue;
+    private OkHttpClient client1;
 
     ImageView userImage;
     ActionBarDrawerToggle mDrawerToggle;
     DrawerLayout drawerLayout;
     boolean mToolBarNavigationListenerIsRegistered= true;
+    String customerID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +71,15 @@ public class ForumActivity extends AppCompatActivity implements  NavigationView.
         mAuth = FirebaseAuth.getInstance();
         currentUser =mAuth.getCurrentUser();
 
-
+        client1 = new OkHttpClient();
         setSupportActionBar(toolbar);
         final ActionBar actionBar = getSupportActionBar();
+
+        if(getIntent().getExtras()!=null)
+        {
+            customerID = getIntent().getExtras().getString("CUSTOMER_ID");
+            FirebaseDatabase.getInstance().getReference("users").child(currentUser.getUid()).child("customerID").setValue(customerID);
+        }
 
         if (actionBar != null)
         {
@@ -174,6 +197,12 @@ public class ForumActivity extends AppCompatActivity implements  NavigationView.
 //                break;
             //nav_newpost
 
+
+            case R.id.nav_payment:
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MyPaymentFragment()).commit();
+                break;
+
+
             case R.id.nav_chats:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ChatFragment()).commit();
                 break;
@@ -199,8 +228,8 @@ public class ForumActivity extends AppCompatActivity implements  NavigationView.
     }
 
 
-
-
-
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 }

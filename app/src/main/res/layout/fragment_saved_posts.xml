@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".SavedPostsFragment"
-    android:background="@drawable/background2">
+    android:background="@drawable/item_gradient">
 
 
     <androidx.recyclerview.widget.RecyclerView

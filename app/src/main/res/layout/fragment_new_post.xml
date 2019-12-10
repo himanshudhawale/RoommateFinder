@@ -5,30 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".NewPostFragment"
-    android:background="@drawable/background2">
+    android:background="@drawable/item_gradient">
 
 
     <Spinner
         android:id="@+id/spinnerID2"
-        android:layout_width="212dp"
+        android:layout_width="0dp"
         android:layout_height="38dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.82"
-        app:layout_constraintStart_toEndOf="@+id/textView9"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/textView9"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:fontFamily="sans-serif"
-        android:text="Gender"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -37,99 +24,87 @@
         android:id="@+id/textView10"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="28dp"
-        android:fontFamily="sans-serif"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:fontFamily="@font/arima_madurai_thin"
         android:text="Date Available"
         android:textColor="#FFFFFF"
-        android:textSize="24sp"
+        android:textSize="20dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView9" />
+        app:layout_constraintTop_toBottomOf="@+id/spinnerID2" />
 
     <TextView
         android:id="@+id/textView11"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="28dp"
-        android:fontFamily="sans-serif"
-        android:text="City"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:fontFamily="@font/arima_madurai_thin"
+        android:text="Address"
         android:textColor="#FFFFFF"
-        android:textSize="24sp"
+        android:textSize="20dp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView10" />
 
-    <TextView
-        android:id="@+id/textView12"
-        android:layout_width="134dp"
-        android:layout_height="64dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="40dp"
-        android:fontFamily="sans-serif"
-        android:text=" Additional Information"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        android:textStyle="bold"
+    <fragment
+        android:id="@+id/city_fragment"
+        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView11" />
+        app:layout_constraintTop_toBottomOf="@+id/textView11"
+        tools:ignore="MissingConstraints" />
 
     <EditText
         android:id="@+id/editTextDateID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="20dp"
         android:ems="10"
-        android:inputType="textPersonName"
         android:hint="MM/DD/YYYY"
+        android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textView10"
         app:layout_constraintTop_toBottomOf="@+id/spinnerID2" />
 
     <EditText
-        android:id="@+id/editTextCityID"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:hint="City"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.844"
-        app:layout_constraintStart_toEndOf="@+id/textView11"
-        app:layout_constraintTop_toBottomOf="@+id/editTextDateID" />
-
-    <EditText
         android:id="@+id/editTextAdditionalID"
-        android:layout_width="211dp"
-        android:layout_height="111dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="0dp"
+        android:layout_height="110dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
         android:ems="10"
         android:hint="Additional Information"
-
         android:inputType="textMultiLine"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.642"
-        app:layout_constraintStart_toEndOf="@+id/textView12"
-        app:layout_constraintTop_toBottomOf="@+id/editTextCityID" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/city_fragment" />
 
     <ImageView
         android:id="@+id/imageViewRoom1"
         android:layout_width="182dp"
         android:layout_height="91dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="54dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
         android:src="@drawable/group1"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView12" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextAdditionalID" />
 
     <ImageView
         android:id="@+id/imageViewRoom3"
         android:layout_width="182dp"
         android:layout_height="91dp"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
         android:src="@drawable/group1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewRoom1" />
@@ -138,7 +113,9 @@
         android:id="@+id/imageViewRoom4"
         android:layout_width="182dp"
         android:layout_height="91dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
         android:src="@drawable/group1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imageViewRoom3"
@@ -148,34 +125,41 @@
         android:id="@+id/imageViewRoom2"
         android:layout_width="182dp"
         android:layout_height="91dp"
-        android:layout_marginTop="54dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
         android:src="@drawable/group1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imageViewRoom1"
-        app:layout_constraintTop_toBottomOf="@+id/textView12" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextAdditionalID" />
 
     <Button
         android:id="@+id/buttonPostID"
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="22dp"
-        android:layout_marginEnd="28dp"
-        android:background="@drawable/btnbackground"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/button_gradient"
+        android:fontFamily="casual"
         android:text="Post"
+        android:textColor="#ffffff"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/buttonClearID"
         app:layout_constraintTop_toBottomOf="@+id/imageViewRoom4" />
 
     <Button
         android:id="@+id/buttonClearID"
-        android:layout_width="wrap_content"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="22dp"
-        android:background="@drawable/btnbackground"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/button_gradient"
+        android:fontFamily="casual"
         android:text="Clear"
-
+        android:textColor="#ffffff"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageViewRoom3" />
 

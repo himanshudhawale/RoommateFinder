@@ -3,16 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MyPostFragment"
-    android:background="@drawable/item_gradient">
-
+    tools:context=".MyPaymentFragment">
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycle"
+        android:id="@+id/recyclerID"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:context=".ForumFragment" />
+        android:layout_height="match_parent" />
+
 
 
 </FrameLayout>

@@ -7,8 +7,11 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="type">Type message to send...</string>
     <string name="nulll"></string>
+    <string name="api_key">AIzaSyB_8PuomG_x82ONTPBPva-Hawl_lFbebA8</string>
 
-
+    <string name="menu1">Sort By Location</string>
+    <string name="menu2">Newest to Oldest</string>
+    <string name="menu3">Filter By Gender</string>
     <!--    <integer-array name="img_id_arr">-->
     <!--    <item id="abc1">@drawable/plusbtn</item>-->
     <!--    <item id="abc2">@drawable/profilepic</item>-->

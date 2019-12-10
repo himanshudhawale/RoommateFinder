@@ -53,8 +53,10 @@ public class ChatActivity extends AppCompatActivity {
     String getUrl;
     FirebaseDatabase database;
     StorageReference storageRef;
-    DatabaseReference postRef, myRefUser, myRefToChat, myRefToChat2,  myRefToMyChats, myRefToMyChats2, myRefToPayment;
+    DatabaseReference postRef, myRefUser, myRefToChat, myRefToChat2,  myRefToMyChats, myRefToMyChats2, myRefToPayment, myRefToPayment2;
 
+
+    Messages firstMessage;
 
     Messages lastMessage;
 
@@ -79,6 +81,7 @@ public class ChatActivity extends AppCompatActivity {
     String secondUserID="";
     Bitmap bitmapToSend = null;
     String numberAmount="0";
+    boolean checkFlag = false;
 
 
     @Override
@@ -100,6 +103,8 @@ public class ChatActivity extends AppCompatActivity {
         listViewChats.setLongClickable(true);
 
         myRefUser = database.getReference("users").child(currentUser.getUid());
+        myRefToPayment = database.getReference("mypayment");
+        myRefToPayment2 = database.getReference("payment");
 
 
 
@@ -176,7 +181,19 @@ public class ChatActivity extends AppCompatActivity {
                             messageList = getMessageList;
                             adapter = new MessageAdapter(ChatActivity.this, R.layout.message_item, messageList, currentUser.getUid(),secondUserID, adapter);
                             listViewChats.setAdapter(adapter);
+                            postID = messageList.get(0).postID;
 
+                        }
+                        checkFlag = false;
+                        for(int i=0;i<messageList.size();i++)
+                        {
+                            if(messageList.get(i).userID.equals(currentUser.getUid()))
+                            {
+                                if(messageList.get(i).postID == null)
+                                {
+                                    checkFlag = true;
+                                }
+                            }
                         }
 
 
@@ -187,6 +204,7 @@ public class ChatActivity extends AppCompatActivity {
 
                     }
                 });
+
 
                 myRefToChat2 = database.getReference("chats").child(secondUserID).child(currentUser.getUid());
 
@@ -259,6 +277,14 @@ public class ChatActivity extends AppCompatActivity {
 
                     String key = myRefToChat.push().getKey();
                     message.messageID = key;
+
+                    if(post!=null)
+                    {
+                        message.postID=post.pid;
+                    }else if(messageList.size()>0 && messageList.get(0).postID!=null && messageList.get(0).userID.equals(currentUser.getUid()))
+                    {
+                        message.postID=postID;
+                    }
 
                     //Make The bitmap null again
                     bitmapToSend = null;
@@ -428,7 +454,7 @@ public class ChatActivity extends AppCompatActivity {
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.requestID) {
+                if (item.getItemId() == R.id.requestID && checkFlag) {
                     AlertDialog.Builder alertDialog = new AlertDialog.Builder(ChatActivity.this);
                     alertDialog.setTitle("Request Amount");
                     alertDialog.setMessage("Enter amount to be paid");
@@ -450,6 +476,38 @@ public class ChatActivity extends AppCompatActivity {
                                     if (!numberAmount.equals("")) {
                                         Toast.makeText(getApplicationContext(),
                                                 "Requested Amount is " + numberAmount, Toast.LENGTH_SHORT).show();
+
+                                        String paymentToUserID="";
+                                        if(post!=null)
+                                        {
+                                            paymentToUserID = post.userID;
+                                        }else{
+                                            paymentToUserID = secondUserID;
+                                        }
+//                                        String key = myRefToPayment.child(paymentToUserID).c
+                                        final String finalPaymentToUserID = paymentToUserID;
+                                        FirebaseDatabase.getInstance().getReference("posts").child(postID).addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                Post pp = dataSnapshot.getValue(Post.class);
+
+                                                Payment payment = new Payment();
+                                                payment.pid = pp.paymentID;
+                                                payment.firstUserID = currentUser.getUid();
+                                                payment.postID = postID;
+                                                payment.secondUserID = secondUserID;
+                                                payment.amount = numberAmount;
+                                                payment.status = "requested";
+
+                                                myRefToPayment.child(finalPaymentToUserID).child(payment.pid).setValue(payment);
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+
 
                                     }
                                 }

@@ -4,16 +4,20 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Intent;
-
+import com.google.android.gms.common.api.Status;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-
+import java.util.Arrays;
 import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
@@ -28,7 +32,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-
+import static com.android.volley.VolleyLog.TAG;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -65,6 +69,7 @@ public class NewPostFragment extends Fragment {
     Post post;
 
     FirebaseAuth mAuth;
+    private Place addressP;
     FirebaseUser currentUser;
     FirebaseDatabase database;
 //    StorageReference storageRef;
@@ -89,10 +94,36 @@ public class NewPostFragment extends Fragment {
         database = FirebaseDatabase.getInstance();
 
 
+
+
+        String apiKey = getString(R.string.api_key);
+        /**
+         * Initialize Places. For simplicity, the API key is hard-coded. In a production
+         * environment we recommend using a secure mechanism to manage API keys.
+         */
+        if (!Places.isInitialized()) {
+            Places.initialize(view1.getContext(), apiKey);
+        }
+// Create a new Places client instance.
+        PlacesClient placesClient = Places.createClient(view1.getContext());
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)getChildFragmentManager().findFragmentById(R.id.city_fragment);
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME,Place.Field.LAT_LNG));
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                addressP=place;
+            }
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i(TAG, "An error occurred: " + status);
+            }
+        });
+
+
         mDateEditText = view1.findViewById(R.id.editTextDateID);
         mDateEditText.setInputType(InputType.TYPE_NULL);
         myspinner = view1.findViewById(R.id.spinnerID2);
-        cityEditText = view1.findViewById(R.id.editTextCityID);
         buttonClear = view1.findViewById(R.id.buttonClearID);
         buttonPost = view1.findViewById(R.id.buttonPostID);
         additionalEditText = view1.findViewById(R.id.editTextAdditionalID);
@@ -144,7 +175,7 @@ public class NewPostFragment extends Fragment {
         });
 
 
-        String[] arraySpinner = new String[]{"Male", "Female", "Gender Neutral"};
+        String[] arraySpinner = new String[]{"Available for:","Male", "Female", "Gender Neutral"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(view1.getContext(),
                 android.R.layout.simple_spinner_item, arraySpinner);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -172,7 +203,7 @@ public class NewPostFragment extends Fragment {
             public void onClick(View view) {
                 String genderString = myspinner.getSelectedItem().toString();
                 String dateString = mDateEditText.getText().toString();
-                String cityString = cityEditText.getText().toString();
+//                String cityString = cityEditText.getText().toString();
                 String additionalString = additionalEditText.getText().toString();
 
                 // ------ ******* --------
@@ -184,9 +215,14 @@ public class NewPostFragment extends Fragment {
                 post.gender = genderString;
                 post.pid = UUID.randomUUID().toString();
                 post.date = dateString;
-                post.city = cityString;
+                post.city = addressP.getName();;
                 post.additional = additionalString;
                 post.userID = currentUser.getUid();
+                post.status="available";
+                post.lat=addressP.getLatLng().latitude;
+                post.lng=addressP.getLatLng().longitude;
+
+                post.paymentID=UUID.randomUUID().toString();
 
                 for(int i=0;i<4; i++){
                     uploadImage(bitmaps[i], i);

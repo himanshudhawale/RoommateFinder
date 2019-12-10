@@ -6,8 +6,8 @@ import java.util.List;
 
 public class Post  {
 
-    public String pid, gender, date, city, additional, time, userID;
-
+    public String pid, gender, date, city, additional, time, userID, status, paymentID;
+    public Double lat, lng;
     public List<String> imageList = new ArrayList<>();
 
     @Override
@@ -20,11 +20,13 @@ public class Post  {
                 ", additional='" + additional + '\'' +
                 ", time='" + time + '\'' +
                 ", userID='" + userID + '\'' +
+                ", status='" + status + '\'' +
+                ", paymentID='" + paymentID + '\'' +
                 ", imageList=" + imageList +
                 '}';
     }
 
-    public Post(String pid, String gender, String date, String city, String additional, String time, String userID, List<String> imageList) {
+    public Post(String pid, String gender, String date, String city, String additional, String time, String userID, List<String> imageList, String status, String paymentID, Double lat, Double lon) {
         this.pid = pid;
         this.gender = gender;
         this.date = date;
@@ -33,6 +35,10 @@ public class Post  {
         this.time = time;
         this.userID = userID;
         this.imageList = imageList;
+        this.status = status;
+        this.paymentID = paymentID;
+        this.lat = lat;
+        this.lng = lon;
     }
 
     public Post(){

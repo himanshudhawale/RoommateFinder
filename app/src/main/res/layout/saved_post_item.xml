@@ -22,7 +22,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/background2"
+            android:background="@drawable/item_gradient"
             android:paddingVertical="5dp">
 
 

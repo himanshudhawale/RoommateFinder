@@ -2,11 +2,25 @@ package com.example.roommatefinder;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import com.google.android.gms.common.api.Status;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -29,14 +43,24 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class SignupActivity extends AppCompatActivity {
     private static final String TAG = "EmailPassword";
 
+    private EditText firstName;
+    private EditText lastName;
+    private EditText age;
+    private EditText email;
+    private EditText password;
+    private EditText confirmPassword;
+    private Place cityP;
 
-    private EditText firstName, lastName, age, email, password, confirmPassword, city;
     private Button signup,cancel;
     private Spinner myspinner;
     private ImageView imageView;
@@ -51,10 +75,39 @@ public class SignupActivity extends AppCompatActivity {
     String getUrl=null;
     User user = new User();
 
+    private OkHttpClient client, client1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+
+        String apiKey = getString(R.string.api_key);
+        /**
+         * Initialize Places. For simplicity, the API key is hard-coded. In a production
+         * environment we recommend using a secure mechanism to manage API keys.
+         */
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), apiKey);
+        }
+// Create a new Places client instance.
+        PlacesClient placesClient = Places.createClient(this);
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.city_fragment);
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME,Place.Field.LAT_LNG));
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                cityP=place;
+            }
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i(TAG, "An error occurred: " + status);
+            }
+        });
+
 
 
         firstName = findViewById(R.id.firstName);
@@ -63,16 +116,18 @@ public class SignupActivity extends AppCompatActivity {
         password = findViewById(R.id.passwordID);
         age = findViewById(R.id.ageID);
         confirmPassword = findViewById(R.id.confirmPasswordID);
-        city = findViewById(R.id.cityID);
+//        city = findViewById(R.id.cityID);
         signup = findViewById(R.id.signupID);
         imageView = findViewById(R.id.imageView);
         myspinner = findViewById(R.id.spinnerID);
         cancel = findViewById(R.id.cancelID);
+        client = new OkHttpClient();
 
-        String[] arraySpinner = new String[]{"Male", "Female"};
+        String[] arraySpinner = new String[]{ "Select Gender","Male", "Female"};
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_spinner_item, arraySpinner);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        myspinner.setSelection(0);
         myspinner.setAdapter(adapter);
 
 
@@ -114,9 +169,11 @@ public class SignupActivity extends AppCompatActivity {
                 final String stremail = email.getText().toString();
                 final String strpassword = password.getText().toString();
                 String strconfirm = confirmPassword.getText().toString();
-                final String strcity = city.getText().toString();
+                final String strcity = cityP.getName();
                 final String gender = myspinner.getSelectedItem().toString();
                 final String strage = age.getText().toString();
+                final Double cityLat=cityP.getLatLng().latitude;
+                final Double cityLng=cityP.getLatLng().longitude;
 
 
                 if (stremail.isEmpty() || strpassword.isEmpty() || strconfirm.isEmpty() || strage.isEmpty() || strfirst.isEmpty() || strlast.isEmpty() || strcity.isEmpty() || gender.isEmpty()) {
@@ -131,47 +188,121 @@ public class SignupActivity extends AppCompatActivity {
                 }
                 else {
 
-//                    Log.d("THE", "Well inside else");
-                    // [START create_user_with_email]
-                    mAuth.createUserWithEmailAndPassword(stremail, strpassword)
-                            .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
 
-                                @Override
-                                public void onComplete(@NonNull Task<AuthResult> task) {
-                                    if (task.isSuccessful()) {
+                    MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+                    JSONObject jsonObject = new JSONObject();
+
+                    try {
+                        jsonObject.put("email",stremail);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        jsonObject.put("password",strpassword);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        jsonObject.put("firstName",strfirst);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        jsonObject.put("lastName",strlast);
+                    } catch (JSONException e) {
+
+
+                    }
+                    try {
+                        jsonObject.put("address",strcity);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    String jsonString=jsonObject.toString();
+                    Log.d("Json string", "register: "+jsonString);
+                    RequestBody rbody = RequestBody.create(JSON, jsonString);
+
+
+                    Request request = new Request.Builder()
+                            .url("http://ec2-3-94-187-73.compute-1.amazonaws.com:5000/users/register")
+                            .header("Accept", "application/json")
+                            .header("Content-Type", "application/json")
+                            .post(rbody)
+                            .build();
+
+
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+
+                            e.printStackTrace();
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+
+
+                            String json = response.body().string();
+                            if(json.equals("{}")) {
+
+
+                                //                    Log.d("THE", "Well inside else");
+                                // [START create_user_with_email]
+                                mAuth.createUserWithEmailAndPassword(stremail, strpassword)
+                                        .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
+
+                                            @Override
+                                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                                if (task.isSuccessful()) {
 //                                        Log.d("THE", "I'm here llala");
 
-                                        // Sign in success, update UI with the signed-in user's information
-                                        Log.d(TAG, "createUserWithEmail:success");
-                                        FirebaseUser fUser = mAuth.getCurrentUser();
-                                        if (fUser != null) {
-                                            uploadImage(bitmapToSend, mAuth.getCurrentUser().getUid());
+                                                    // Sign in success, update UI with the signed-in user's information
+                                                    Log.d(TAG, "createUserWithEmail:success");
+                                                    FirebaseUser fUser = mAuth.getCurrentUser();
+                                                    if (fUser != null) {
+                                                        uploadImage(bitmapToSend, mAuth.getCurrentUser().getUid());
 
 
 
-                                            String useruid = fUser.getUid();
+                                                        String useruid = fUser.getUid();
 
-                                            user.uID = useruid;
-                                            user.first = strfirst;
-                                            user.last = strlast;
-                                            user.email = stremail;
-                                            user.password = strpassword;
-                                            user.city = strcity;
-                                            user.gender = gender;
-                                            user.age = strage;
-                                            user.status = "none";
+                                                        user.uID = useruid;
+                                                        user.first = strfirst;
+                                                        user.last = strlast;
+                                                        user.email = stremail;
+                                                        user.password = strpassword;
+                                                        user.city = strcity;
+                                                        user.gender = gender;
+                                                        user.age = strage;
+                                                        user.status = "none";
+                                                        user.customerID="abc";
+                                                        user.latitude=cityLat;
+                                                        user.longitude=cityLng;
 
 
-                                        } else {
+
+                                                    } else {
 //                                            Log.d("THE", "I'm here lolo");
 
-                                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                                            Toast.makeText(SignupActivity.this, "Authentication failed.",
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                }
-                            });
+                                                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                                                        Toast.makeText(SignupActivity.this, "Authentication failed.",
+                                                                Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+                                            }
+                                        });
+
+                            }
+
+
+                        }
+
+
+                    });
+
+
 
 
                 }
@@ -279,5 +410,6 @@ public class SignupActivity extends AppCompatActivity {
 
 
     }
+
 
 }
