@@ -22,6 +22,8 @@ public class Post  {
                 ", userID='" + userID + '\'' +
                 ", status='" + status + '\'' +
                 ", paymentID='" + paymentID + '\'' +
+                ", lat=" + lat +
+                ", lng=" + lng +
                 ", imageList=" + imageList +
                 '}';
     }

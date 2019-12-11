@@ -1,6 +1,7 @@
 package com.example.roommatefinder;
 
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 
@@ -10,12 +11,13 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,6 +25,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 
@@ -35,10 +39,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 
 public class ForumFragment extends Fragment {
@@ -50,13 +59,13 @@ public class ForumFragment extends Fragment {
     DatabaseReference postRef, savedPostRef, userRef;
     SwipeController swipeController = null;
 
+    PostAdapter postAdapter;
     RecyclerView recyclerView;
 
     String keyword;
-
     User user;
     List<Post> postArrayList,filteredList;
-
+     List<Double> list;
 
 
     @Override
@@ -67,6 +76,26 @@ public class ForumFragment extends Fragment {
 
     }
 
+    private double distance(double lat1, double lon1, double lat2, double lon2) {
+        double theta = lon1 - lon2;
+        double dist = Math.sin(deg2rad(lat1))
+                * Math.sin(deg2rad(lat2))
+                + Math.cos(deg2rad(lat1))
+                * Math.cos(deg2rad(lat2))
+                * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+        return (dist);
+    }
+
+    private double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    private double rad2deg(double rad) {
+        return (rad * 180.0 / Math.PI);
+    }
 
 
     @Override
@@ -77,55 +106,75 @@ public class ForumFragment extends Fragment {
                 currentUser = mAuth.getCurrentUser();
                 database = FirebaseDatabase.getInstance();
                 postRef = database.getReference("posts");
-                userRef=database.getReference("users");
+                userRef=database.getReference("users").child(currentUser.getUid());
                 recyclerView = view.findViewById(R.id.frame);
                 userRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                            User  dummy = dataSnapshot1.getValue(User.class);
-                            if(dummy.uID==currentUser.getUid())
-                            {
-                                user=dummy;
-                                break;
+                            user = dataSnapshot.getValue(User.class);
+
+                        final Location userLoc=new Location("");
+                        userLoc.setLatitude(user.latitude);
+                        userLoc.setLongitude(user.longitude);
+
+
+//                        postArrayList=new ArrayList<>();
+                        postRef.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                postArrayList = new ArrayList<>();
+                                list = new ArrayList<>();
+                                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                                    Post post = dataSnapshot1.getValue(Post.class);
+                                    if(post.status.equals("available")) {
+                                        postArrayList.add(post);
+
+                                    }
+                                }
+                                Collections.sort(postArrayList, new Comparator<Post>() {
+                                    @Override
+                                    public int compare(Post post, Post t1) {
+                                        Location a=new Location("");
+                                        a.setLatitude(post.lat);
+                                        a.setLongitude(post.lng);
+                                        Location b=new Location("");
+                                        b.setLatitude(post.lat);
+                                        b.setLongitude(post.lng);
+                                        double distanceToPlace1 = distance(user.latitude, user.longitude, post.lat, post.lng);
+                                        double distanceToPlace2 = distance(user.latitude, user.longitude, t1.lat, t1.lng);
+
+
+
+                                        return (int) (distanceToPlace1 - distanceToPlace2);
+
+                                    }
+                                });
+
+
+
+
+                                Log.d("inside menu", postArrayList.toString());
+                                Log.d("inside menu", list.toString());
+                                postAdapter = new PostAdapter(getContext(), R.layout.post_item, postArrayList);
+                                recyclerView.setAdapter(postAdapter);
+                                postAdapter.notifyDataSetChanged();
                             }
-                        }
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                            }
+                        });
+
+
+
                     }
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                     }
                 });
-                postArrayList=new ArrayList<>();
-                postRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        postArrayList = new ArrayList<>();
-                        for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                            Post post = dataSnapshot1.getValue(Post.class);
-                            postArrayList.add(post);
-                        }
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                });
-                final Location userLoc=new Location("");
-                userLoc.setLatitude(user.latitude);
-                userLoc.setLongitude(user.longitude);
-                Collections.sort(postArrayList, new Comparator<Post>() {
-                    @Override
-                    public int compare(Post post, Post t1) {
-                        Location a=new Location("");
-                        a.setLatitude(post.lat);
-                        a.setLongitude(post.lng);
-                        Location b=new Location("");
-                        b.setLatitude(post.lat);
-                        b.setLongitude(post.lng);
-                        double distance1= userLoc.distanceTo(a)/1000;
-                        double distance2= userLoc.distanceTo(b)/1000;
-                        return (int)(distance1-distance2);
-                    }
-                });
+
+
+
+
                 return false;
             }
             case R.id.action2: {
@@ -139,67 +188,121 @@ public class ForumFragment extends Fragment {
                         postArrayList = new ArrayList<>();
                         for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
                             Post post = dataSnapshot1.getValue(Post.class);
-                            postArrayList.add(post);
+                            if(post.status.equals("available"))
+                            {
+                                postArrayList.add(post);
+                            }
                         }
+                        Collections.sort(postArrayList, new Comparator<Post>() {
+                            public int compare(Post o1, Post o2) {
+                                DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+
+                                Date date1 = null;
+                                Date date2 = null;
+                                try {
+                                    date1=format.parse(o1.date);
+                                    date2=format.parse(o2.date);
+
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+
+                                return date1.compareTo(date2);
+                            }
+                        });
+
+                        postAdapter = new PostAdapter(getContext(), R.layout.post_item, postArrayList);
+                        recyclerView.setAdapter(postAdapter);
+                        postAdapter.notifyDataSetChanged();
+
+
+
                     }
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                     }
                 });
-                Collections.sort(postArrayList, new Comparator<Post>() {
-                    @Override
-                    public int compare(Post post1, Post post2) {
-                        return post1.date.compareTo(post2.date);
-                    }
-                });
-                final PostAdapter postAdapter = new PostAdapter(view.getContext(), R.layout.post_item, filteredList);
-                recyclerView.setAdapter(postAdapter);
+
                 return false;
             }
             case R.id.action3: {
-//                AlertDialog.Builder alertDialog = new AlertDialog.Builder();
-//                alertDialog.setTitle("Keyword Filter");
-//                alertDialog.setMessage("Enter keyword to filter");
-//
-//                final EditText input = new EditText(getContext());
-//                input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-//
-//                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-//                        LinearLayout.LayoutParams.MATCH_PARENT,
-//                        LinearLayout.LayoutParams.MATCH_PARENT);
-//                input.setLayoutParams(lp);
-//                alertDialog.setView(input);
-//                alertDialog.setIcon(R.drawable.money);
-//
-//                alertDialog.setPositiveButton("OKAY",
-//                        new DialogInterface.OnClickListener() {
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                keyword = input.getText().toString();
-//                                if (!keyword.equals("")) {
-//                                    Toast.makeText(view.getContext(),
-//                                            "Selected Keyword is  " + keyword, Toast.LENGTH_SHORT).show();
-//
-//                                }
-//                            }
-//                        });
-//
-//                alertDialog.setNegativeButton("CANCEL",
-//                        new DialogInterface.OnClickListener() {
-//                            public void onClick(DialogInterface dialog, int which) {
-//                                dialog.cancel();
-//                            }
-//                        });
-//
-//                alertDialog.show();
-                Log.d("The array list size is",String.valueOf(postArrayList.size()));
-                filteredList= new ArrayList<>();
-                for(Post p:postArrayList)
-                {
-                    if(p.toString().contains("female"))
-                        filteredList.add(p);
-                }
-                final PostAdapter postAdapter = new PostAdapter(view.getContext(), R.layout.post_item, filteredList);
-                recyclerView.setAdapter(postAdapter);
+
+                database = FirebaseDatabase.getInstance();
+                postRef = database.getReference("posts");
+                recyclerView = view.findViewById(R.id.frame);
+                postArrayList=new ArrayList<>();
+
+                postRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                            Post post = dataSnapshot1.getValue(Post.class);
+                            if(post.status.equals("available"))
+                            {
+                                postArrayList.add(post);
+                            }
+                        }
+
+
+
+                        ///here
+                        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
+                        alertDialog.setTitle("Keyword Filter");
+                        alertDialog.setMessage("Enter keyword to filter");
+
+                        final EditText input = new EditText(getContext());
+                        input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+
+                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.MATCH_PARENT);
+                        input.setLayoutParams(lp);
+                        alertDialog.setView(input);
+                        alertDialog.setIcon(R.drawable.money);
+
+                        alertDialog.setPositiveButton("OKAY",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        keyword = input.getText().toString();
+                                        if (!keyword.equals("")) {
+                                            Toast.makeText(view.getContext(),
+                                                    "Selected Keyword is  " + keyword, Toast.LENGTH_SHORT).show();
+
+                                            Log.d("The array list size is",String.valueOf(postArrayList.size()));
+                                            filteredList= new ArrayList<>();
+                                            for(Post p:postArrayList)
+                                            {
+                                                if(p.gender.toLowerCase().equals(keyword.toLowerCase()))
+                                                    filteredList.add(p);
+                                            }
+                                            postAdapter = new PostAdapter(view.getContext(), R.layout.post_item, filteredList);
+                                            recyclerView.setAdapter(postAdapter);
+                                            postAdapter.notifyDataSetChanged();
+
+                                        }
+                                    }
+                                });
+
+                        alertDialog.setNegativeButton("CANCEL",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        alertDialog.show();
+
+
+
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
                 //filetr post
                 return false;
             }
@@ -214,6 +317,7 @@ public class ForumFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         view=inflater.inflate(R.layout.fragment_forum,container,false);
+        setHasOptionsMenu(true);
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
@@ -243,7 +347,7 @@ public class ForumFragment extends Fragment {
                 LinearLayoutManager llm = new LinearLayoutManager(getActivity());
                 llm.setOrientation(LinearLayoutManager.VERTICAL);
                 recyclerView.setLayoutManager(llm);
-                final PostAdapter postAdapter = new PostAdapter(view.getContext(), R.layout.post_item, postArrayList);
+                postAdapter = new PostAdapter(view.getContext(), R.layout.post_item, postArrayList);
                 recyclerView.setAdapter(postAdapter);
 
 
